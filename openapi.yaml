@@ -1,0 +1,128 @@
+openapi: 3.0.3
+info:
+  title: Polygon.io API
+  description: |
+    This is the OpenAPI 3.0 specification for Polygon.io’s APIs, including endpoints for stocks, options, forex, and crypto.
+  version: 0.1.0
+  contact:
+    name: Polygon.io
+    url: https://polygon.io/
+    email: support@polygon.io
+
+servers:
+  - url: https://api.polygon.io
+    description: Polygon.io API server
+
+paths:
+  /v2/aggs/ticker/{ticker}/range/{multiplier}/{timespan}/{from}/{to}:
+    get:
+      summary: Get aggregate bars for a ticker over a given date range.
+      description: Returns aggregate bars (OHLCV) for a given ticker symbol over a specified date range.
+      parameters:
+        - in: path
+          name: ticker
+          required: true
+          schema:
+            type: string
+          description: Ticker symbol (e.g., AAPL)
+        - in: path
+          name: multiplier
+          required: true
+          schema:
+            type: integer
+          description: Size of the timespan multiplier (e.g., 1)
+        - in: path
+          name: timespan
+          required: true
+          schema:
+            type: string
+            enum: [minute, hour, day, week, month, quarter, year]
+          description: Timespan size (e.g., day)
+        - in: path
+          name: from
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Start date (YYYY-MM-DD)
+        - in: path
+          name: to
+          required: true
+          schema:
+            type: string
+            format: date
+          description: End date (YYYY-MM-DD)
+        - in: query
+          name: adjusted
+          schema:
+            type: boolean
+            default: true
+          description: Whether or not the results are adjusted for splits.
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: Sort order of results.
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 120
+          description: Limits the number of results returned.
+        - in: query
+          name: apiKey
+          schema:
+            type: string
+          description: Your Polygon.io API key.
+      responses:
+        '200':
+          description: Successful response with aggregate bars.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ticker:
+                    type: string
+                  status:
+                    type: string
+                  queryCount:
+                    type: integer
+                  resultsCount:
+                    type: integer
+                  adjusted:
+                    type: boolean
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        v:
+                          type: number
+                          description: Volume
+                        o:
+                          type: number
+                          description: Open price
+                        c:
+                          type: number
+                          description: Close price
+                        h:
+                          type: number
+                          description: High price
+                        l:
+                          type: number
+                          description: Low price
+                        t:
+                          type: integer
+                          description: Unix Msec timestamp for start of aggregate window
+                        n:
+                          type: integer
+                          description: Number of transactions in aggregate window
+        '400':
+          description: Invalid request parameters.
+        '401':
+          description: Unauthorized. Invalid or missing API key.
+        '500':
+          description: Internal server error.
